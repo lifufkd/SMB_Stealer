@@ -6,7 +6,6 @@
 
 import os
 import argparse
-import keyboard
 from tqdm import tqdm
 import threading
 from itertools import product
@@ -73,7 +72,9 @@ def parse_dict(path, flag):
 
 
 def stop_scan():
-    keyboard.wait('esc')
+    while True:
+        if input('').lower == 'stop':
+            break
 
 
 def _decrypt(use_decrypt):
