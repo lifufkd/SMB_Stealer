@@ -66,7 +66,7 @@ def parse_dict(path, flag):
         creds = set(product(temp_locker, repeat=2))
     else:
         creds = ['']
-        creds.extend(list(data))
+        creds.extend(set(data))
     return creds
 
 
