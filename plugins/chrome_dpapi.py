@@ -10,7 +10,6 @@
 # 
 
 import argparse
-import sys
 import os
 import json
 import base64
@@ -52,9 +51,7 @@ class Dpapi_decrypt(object):
 
     def main(self):
         if not os.path.isfile(os.path.join(self.dir_location , 'Local State')):
-            sys.exit("No Local State file found")
-        if not os.path.isfile(os.path.join(self.dir_location ,'Default', 'Login Data')):
-            sys.exit("No Local State found in Default that directory")
+            pass
         else:
             print(bcolors.OKGREEN +" * "+ bcolors.ENDC + "Local State and Login Data files found" )
         #call function to read Local State file and get an impacket Blob dpapi file
@@ -69,30 +66,24 @@ class Dpapi_decrypt(object):
             mkp.loadDirectory(self.masterkey_location)
             mks = mkp.getMasterKeys(bl.mkguid.encode())
             if len(mks) == 0:
-                sys.exit('[-] Unable to find MK for blob %s' % bl.mkguid)
+                pass
             else:
                 print(bcolors.OKGREEN +" * "+ bcolors.ENDC + "MasterKey file found" )
         else:
             print("Needed masterkey(-m) directory with the location of " + bl.mkguid)
-            sys.exit(2)
         if not (self.sid_value):
             try:
                 self.sid_value = ( re.search('((S-1).*?)/', self.masterkey_location )[1])
                 print(bcolors.OKGREEN +" * "+ bcolors.ENDC + "SID " + self.sid_value )
             except:
                 print("Need to specify SID")
-                sys.exit(2)
         #Check if using TBA located key
         if self.tba:
             #TODO tba get key
             # read LSA secrets, find TBAL key
             reg = registry.Regedit()
-            if self.config == None:
-                sys.exit("Need to set config directory (\Windows\System32\config)")
             security = os.path.join(self.config,"SECURITY")
             system = os.path.join(self.config,"SYSTEM")
-            if not(os.path.isfile(security) and os.path.isfile(system)):
-                sys.exit("SYSTEM or SECURITY error opening")
             secrets = reg.get_lsa_secrets(security, system)
             for i in list(secrets.keys()):
                 for k, v in list(secrets[i].items()):
@@ -107,8 +98,7 @@ class Dpapi_decrypt(object):
                                 pass
                             break
             if tbal_data == None:
-                sys.exit("No TBAL found")
-            # go for the decrypt
+                pass
             key_p = binascii.unhexlify(tbal_data)
             mkp.try_credential_hash(self.sid_value,key_p)
 
