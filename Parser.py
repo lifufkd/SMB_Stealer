@@ -123,6 +123,8 @@ def main(share, domain, timeout, creds, target, use_decrypt, attempt=0):
                     attempt += 1
                     logger(['', f'Authentication error - {start} (attempt {attempt} of {len(creds)})'])
                     conn.close()
+                finally:
+                    Users.clear()
         except:
             logger(['', f'Error connection - {start}'])
         start += 1
