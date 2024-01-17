@@ -104,6 +104,7 @@ class DumpSecrets:
         self.__canProcessSAMLSA = True
         self.__kdcHost = None
         self.__exec_method = 'smbexec'
+        self.__output = {}
 
     def connect(self):
         self.__smbConnection = SMBConnection(self.__remoteName, self.__remoteHost)
@@ -224,7 +225,7 @@ class DumpSecrets:
                             SAMFileName = self.__samHive
 
                         self.__SAMHashes = SAMHashes(SAMFileName, bootKey, isRemote = self.__isRemote)
-                        self.__SAMHashes.dump()
+                        self.__output.update(self.__SAMHashes.dump())
                         if self.__outputFileName is not None:
                             self.__SAMHashes.export(self.__outputFileName)
                     except Exception as e:
@@ -311,6 +312,7 @@ class DumpSecrets:
                 self.cleanup()
             except:
                 pass
+        return self.__output
 
     def cleanup(self):
         logging.info('Cleaning up... ')
@@ -326,6 +328,6 @@ class DumpSecrets:
             self.__KeyListSecrets.finish()
 
 
-def Get_users_pass(host, username, hash):
+def Get_users_hashes(host, username, hash):
     dumper = DumpSecrets(host, username, hash)
-    dumper.dump()
+    return dumper.dump()

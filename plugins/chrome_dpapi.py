@@ -53,9 +53,8 @@ class Dpapi_decrypt(object):
         if not os.path.isfile(os.path.join(self.dir_location , 'Local State')):
             pass
         else:
-            print(bcolors.OKGREEN +" * "+ bcolors.ENDC + "Local State and Login Data files found" )
-        #call function to read Local State file and get an impacket Blob dpapi file
-        #open dpapi blob
+            pass
+            #print(bcolors.OKGREEN +" * "+ bcolors.ENDC + "Local State and Login Data files found" )
 
         key = self.local_state_file(self.dir_location)
         bl = blob.DPAPIBlob(key)
@@ -68,7 +67,8 @@ class Dpapi_decrypt(object):
             if len(mks) == 0:
                 pass
             else:
-                print(bcolors.OKGREEN +" * "+ bcolors.ENDC + "MasterKey file found" )
+                pass
+                #print(bcolors.OKGREEN +" * "+ bcolors.ENDC + "MasterKey file found" )
         else:
             print("Needed masterkey(-m) directory with the location of " + bl.mkguid)
         if not (self.sid_value):
@@ -107,9 +107,6 @@ class Dpapi_decrypt(object):
             #Check if password or nopass
             if not self.user_password:
                 self.user_password = ''
-            # go for the decrypt
-            #Add chredhist
-            #mkp.addCredhistFile(sid, os.path.join('Protect','CREDHIST'))
             mkp.try_credential(self.sid_value, self.user_password)
 
         for mk in mks:
