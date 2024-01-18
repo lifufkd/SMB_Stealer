@@ -347,16 +347,14 @@ def Firefox_decryptor(password, dir):
   global directory
   output = ''
   directory = Path(dir)
-  try:
-    key, algo = getKey(password.encode(), directory)
-    logins = getLoginData()
-    if len(logins) == 0:
-      raise
-    if algo == '1.2.840.113549.1.12.5.1.3' or algo == '1.2.840.113549.1.5.13':
-      for i in logins:
-        assert i[0][0] == CKA_ID
-        output += f'{"*" * 50}\nURL: {i[2]}\nUser Name: {unpad(DES3.new(key, DES3.MODE_CBC, i[0][1]).decrypt(i[0][2]), 8)}\nPassword: {unpad(DES3.new(key, DES3.MODE_CBC, i[1][1]).decrypt(i[1][2]), 8)}\n'
-    return output
-  except:
-    return None
+  key, algo = getKey(password.encode(), directory)
+  logins = getLoginData()
+  if len(logins) == 0:
+    raise
+  if algo == '1.2.840.113549.1.12.5.1.3' or algo == '1.2.840.113549.1.5.13':
+    for i in logins:
+      assert i[0][0] == CKA_ID
+      output += f'{"*" * 50}\nURL: {i[2]}\nUser Name: {unpad(DES3.new(key, DES3.MODE_CBC, i[0][1]).decrypt(i[0][2]), 8).decode("utf-8")}\nPassword: {unpad(DES3.new(key, DES3.MODE_CBC, i[1][1]).decrypt(i[1][2]), 8).decode("utf-8")}\n'
+  return output
+
  

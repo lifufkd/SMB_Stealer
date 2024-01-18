@@ -115,7 +115,7 @@ class Dpapi_decrypt(object):
             else:
                 mk.decryptWithPassword(self.sid_value,self.user_password)
             if mk.decrypted:
-                print(bcolors.OKGREEN +" * "+ bcolors.ENDC + "Mk decrypted")
+                #print(bcolors.OKGREEN +" * "+ bcolors.ENDC + "Mk decrypted")
                 bl.decrypt(mk.get_key(), entropy=self.entropy)
                 if bl.decrypted:
                     #if called alone
