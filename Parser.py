@@ -40,13 +40,13 @@ def Get_range_IP(IP):
 
 
 def parse_dict(path, flag):
+    data = ['']
     with open(path, 'r', encoding='utf-8') as file:
-        data = set(filter(None, file.read().split('\n')))
+        data.extend(set(filter(None, file.read().split('\n'))))
     if not flag:
         creds = set(product(data, repeat=2))
     else:
-        creds = ['']
-        creds.extend(set(data))
+        creds = set(data)
     return creds
 
 
@@ -114,12 +114,12 @@ def main(share, domain, timeout, creds, target, use_decrypt, attempt=0):
                     break
                 except:
                     attempt += 1
-                    logger.logger(['', f'Authentication error - {start} (attempt {attempt} of {len(creds)})'])
+                    logger.logger(['', f'Authentication error - {start} (login: {temp_pare[0]}; password: {temp_pare[1]})'])
                     conn.close()
                 finally:
                     Users.clear()
-        except:
-            logger.logger(['', f'Error connection - {start}'])
+        except Exception as e:
+            logger.logger(['', f'Error connection - {start}\n{"?"*100}\n{e}\n{"?"*100}'])
         if not alone:
             start += 1
         else:
@@ -144,14 +144,23 @@ if '__main__' == __name__:
     opt = args.parse_args()
 
     if opt.auto_decrypt is None:
-        passwords = None
+        d_passwords = None
     else:
-        passwords = parse_dict(opt.auto_decrypt, True)
+        d_passwords = parse_dict(opt.auto_decrypt, True)
 
     if opt.u and opt.p and opt.target is not None and (opt.use_dict and opt.only_decrypt is None):
-        main(opt.share, opt.domain, opt.timeout, [(opt.u, opt.p)], opt.target, passwords)
+        main(opt.share, opt.domain, opt.timeout, [(opt.u, opt.p)], opt.target, d_passwords)
+    elif (opt.u or opt.p) and opt.target and opt.use_dict is not None and opt.only_decrypt is None:
+        s_passwords = []
+        if opt.u is not None:
+            for i in parse_dict(opt.use_dict, True):
+                s_passwords.append((opt.u, i))
+        else:
+            for i in parse_dict(opt.use_dict, True):
+                s_passwords.append((i, opt.use_dict))
+        main(opt.share, opt.domain, opt.timeout, s_passwords, opt.target, d_passwords)
     elif opt.use_dict and opt.target is not None and opt.only_decrypt is None:
-        main(opt.share, opt.domain, opt.timeout, parse_dict(opt.use_dict, False), opt.target, passwords)
+        main(opt.share, opt.domain, opt.timeout, parse_dict(opt.use_dict, False), opt.target, d_passwords)
     elif opt.only_decrypt is not None:
         _decrypt(parse_dict(opt.only_decrypt, True), True)
     else:
