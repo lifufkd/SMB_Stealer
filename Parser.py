@@ -157,7 +157,7 @@ if '__main__' == __name__:
                 s_passwords.append((opt.u, i))
         else:
             for i in parse_dict(opt.use_dict, True):
-                s_passwords.append((i, opt.use_dict))
+                s_passwords.append((i, opt.p))
         main(opt.share, opt.domain, opt.timeout, s_passwords, opt.target, d_passwords)
     elif opt.use_dict and opt.target is not None and opt.only_decrypt is None:
         main(opt.share, opt.domain, opt.timeout, parse_dict(opt.use_dict, False), opt.target, d_passwords)
