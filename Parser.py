@@ -50,7 +50,7 @@ def parse_dict(path, flag):
     return creds
 
 
-def _decrypt(use_decrypt, st):
+def decrypt(use_decrypt, st):
     if use_decrypt is not None:
         Decrypor = Decrypt(data_folder, use_decrypt, st)
         with open(f'{data_folder}/clear_passwords.txt', 'w', encoding='utf-8') as fp:
@@ -125,7 +125,7 @@ def main(share, domain, timeout, creds, target, use_decrypt, attempt=0):
         else:
             break
         attempt = 0
-    _decrypt(use_decrypt, False)
+    decrypt(use_decrypt, False)
 
 
 if '__main__' == __name__:
@@ -148,7 +148,7 @@ if '__main__' == __name__:
     else:
         d_passwords = parse_dict(opt.auto_decrypt, True)
 
-    if opt.u and opt.p and opt.target is not None and (opt.use_dict and opt.only_decrypt is None):
+    if (opt.u and opt.p and opt.target) is not None and (opt.use_dict and opt.only_decrypt) is None:
         main(opt.share, opt.domain, opt.timeout, [(opt.u, opt.p)], opt.target, d_passwords)
     elif (opt.u or opt.p) and opt.target and opt.use_dict is not None and opt.only_decrypt is None:
         s_passwords = []
@@ -162,6 +162,6 @@ if '__main__' == __name__:
     elif opt.use_dict and opt.target is not None and opt.only_decrypt is None:
         main(opt.share, opt.domain, opt.timeout, parse_dict(opt.use_dict, False), opt.target, d_passwords)
     elif opt.only_decrypt is not None:
-        _decrypt(parse_dict(opt.only_decrypt, True), True)
+        decrypt(parse_dict(opt.only_decrypt, True), True)
     else:
         print('login/password/target not specified')
