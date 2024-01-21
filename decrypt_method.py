@@ -40,10 +40,10 @@ class Decrypt:
                             self.__user_is_existed = True
                         else:
                             self.__user_is_existed = False
-                        self.Creds()
                         self.Chrome()
                         self.FireFox()
                         self.FileZilla()
+                        self.Creds()
                 self.__logger.logger([f'{"*" * 50}\n'])
         return f'Google chrome passwords\n{"*" * 50}\n{self.__chrome_data}{"*" * 50}\n' + f'\nFireFox passwords\n{"*" * 50}\n{self.__FireFox_data}{"*" * 50}\n' + f'\nFileZilla passwords\n{"*" * 50}\n{self.__FileZilla_data}{"*" * 50}\n' + f'\nCreds passwords\n{"*" * 50}\n{self.__Creds_data}{"*" * 50}\n'
 
@@ -87,12 +87,8 @@ class Decrypt:
         if interrupt:
             self.__logger.logger([f'Success decrypt FileZilla passwords for user {self.__User}'])
         else:
-            if self.__user_is_existed:
-                self.__logger.logger([f'Error decrypt FileZilla passwords for user {self.__User}',
-                                  f'Error decrypt FileZilla passwords for user {self.__User} (NTLM: {self.__hashes[self.__User][33:]})'])
-            else:
-                self.__logger.logger([f'Error decrypt FileZilla passwords for user {self.__User}',
-                                      f'Error decrypt FileZilla passwords for user {self.__User}'])
+            self.__logger.logger([f'Error decrypt FileZilla passwords for user {self.__User}',
+                                  f'Error decrypt FileZilla passwords for user {self.__User}'])
 
     def SSID(self):
         SSID = list()
@@ -114,12 +110,8 @@ class Decrypt:
             if interrupt:
                 self.__logger.logger([f'Success decrypt FileZilla passwords for user {self.__User}'])
             else:
-                if self.__user_is_existed:
-                    self.__logger.logger([f'Error decrypt FileZilla passwords for user {self.__User}',
-                                      f'Error decrypt FileZilla passwords for user {self.__User} (NTLM: {self.__hashes[self.__User][33:]})'])
-                else:
-                    self.__logger.logger([f'Error decrypt FileZilla passwords for user {self.__User}',
-                                          f'Error decrypt FileZilla passwords for user {self.__User}'])
+                self.__logger.logger([f'Error decrypt FileZilla passwords for user {self.__User}',
+                                      f'Error decrypt FileZilla passwords for user {self.__User}'])
         except:
             pass
 
